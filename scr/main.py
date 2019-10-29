@@ -1,14 +1,13 @@
-import csv
-import boto3
-import json as json
-import decimal
-import pprint as pp
 import ast
-import numpy
+import csv
+import decimal
+import json as json
+import pprint as pp
 import sys
-from math import * 
-from boto3.dynamodb.conditions import Key, Attr
+from math import *
 
+import boto3
+from boto3.dynamodb.conditions import Attr, Key
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -126,32 +125,43 @@ def main():
             )
             query_len_list[i] = len(response_list[i]['Items'])    
 
-        json_load_list = number_of_tables * [0]
-        for j in range(number_of_tables):
-            json_load_list[j] = query_len_list[j] * [0]
-            for i in range(query_len_list[j]):   
-                json_load_list[j][i] = ast.literal_eval((json.dumps(response_list[j]['Items'][i], cls=DecimalEncoder)))
 
-       
-        #csv_table = csv.writer(open(str('merge' + '-' + str(primary_key_list[0]) + '.csv', '+w', newline=''),  delimiter=';', quotechar='"', quoting=csv.QUOTE_NONE, escapechar='\\'))
-        #csv_table = csv.writer(open(str(response_from_list['TableNames'][int(table_select)]) + '-' + str(primary_key) + '.csv', '+w', newline=''))
-        csv_table = csv.writer(open('teste.csv', '+w')) 
-        # csv_table.writerow(header_csv.keys())
-        # if sys.argv[2] == 1:
-        #     print('Exporting minute by minute')
-        #     for row in json_load:
-        #         csv_table.writerow(list(row.values()))
-        # else:
-        #     print('Exporting '+ str(sys.argv[2]) +' minute by '+ str(sys.argv[2]) +' minute')
-        #     for row in json_load_list:
-        #         csv_table.writerow(list(row.values()))
-        
-        # print('CSV created with success!')
+        response = max(query_len_list) * []
+        aux = {}
+        for i in range(0, (number_of_tables - 1), 2):
+            l = 0
+            while (l < (query_len_list[i] - 1)) & (l < (query_len_list[i + 1] - 1)):
+                aux = {**response_list[i]['Items'][l], **response_list[i + 1]['Items'][l]}
+                response.append(aux.copy())
+                l += 1
+
+            while (l < (query_len_list[i] - 1)):
+                aux = {**response_list[i]['Items'][l]}
+                response.append(aux.copy())
+                l += 1
+
+            while (l < (query_len_list[i + 1] - 1)):
+                aux = {**response_list[i + 1]['Items'][l]}
+                response.append(aux.copy())
+                l += 1
+
+        name_file = ''
+        for i in range(number_of_tables):
+            name_file = name_file + '-' + str(table_names[i]) 
             
-                
+        csv_table = csv.writer(open('merged' + str(name_file) + str(primary_key_list[0]) +'-'+ '.csv', '+w', newline=''),  delimiter=';', quotechar='"', quoting=csv.QUOTE_NONE, escapechar='\\')
+        csv_table.writerow(response[0].keys())
+        if sys.argv[2] == 1:
+            print('Exporting minute by minute')
+            for row in response:
+                csv_table.writerow(list(row.values()))
+        else:
+            print('Exporting '+ str(sys.argv[2]) +' minute by '+ str(sys.argv[2]) +' minute')
+            for row in response:
+                csv_table.writerow(list(row.values()))
         
-
-        
+        print('CSV created with success!')
+            
     else:
         print('Invalid option!')
        
