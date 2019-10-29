@@ -134,22 +134,13 @@ def main():
                 aux = {**response_list[i]['Items'][l], **response_list[i + 1]['Items'][l]}
                 response.append(aux.copy())
                 l += 1
-
-            while (l < (query_len_list[i] - 1)):
-                aux = {**response_list[i]['Items'][l]}
-                response.append(aux.copy())
-                l += 1
-
-            while (l < (query_len_list[i + 1] - 1)):
-                aux = {**response_list[i + 1]['Items'][l]}
-                response.append(aux.copy())
-                l += 1
+            
 
         name_file = ''
         for i in range(number_of_tables):
             name_file = name_file + '-' + str(table_names[i]) 
             
-        csv_table = csv.writer(open('merged' + str(name_file) + str(primary_key_list[0]) +'-'+ '.csv', '+w', newline=''),  delimiter=';', quotechar='"', quoting=csv.QUOTE_NONE, escapechar='\\')
+        csv_table = csv.writer(open('merged' + str(name_file) + '-' + str(primary_key_list[0]) +'.csv', '+w', newline=''),  delimiter=';', quotechar='"', quoting=csv.QUOTE_NONE, escapechar='\\')
         csv_table.writerow(response[0].keys())
         if sys.argv[2] == 1:
             print('Exporting minute by minute')
