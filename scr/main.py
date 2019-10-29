@@ -131,6 +131,8 @@ def main():
         for i in range(0, (number_of_tables - 1), 2):
             l = 0
             while (l < (query_len_list[i] - 1)) & (l < (query_len_list[i + 1] - 1)):
+                del response_list[i]['Items'][l]['tipo']
+                del response_list[i + 1]['Items'][l]['tipo']
                 aux = {**response_list[i]['Items'][l], **response_list[i + 1]['Items'][l]}
                 response.append(aux.copy())
                 l += 1
